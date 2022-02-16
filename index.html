@@ -1,0 +1,1793 @@
+// import {addTopic} from 'public/new-file.js'
+// import {addDuration} from 'public/new-file.js'
+// import {addContent} from 'public/new-file.js'
+import wixData from 'wix-data';
+import wixWindow from 'wix-window';
+import wixLocation from 'wix-location';
+
+var duration;
+var content;
+var topic;
+var resetFilterAnalyticsLabel;
+var resultsCount;
+var jumpResultsThreshold = 6;
+
+let fadeOptions = {
+  "duration":   250,
+  "delay":      0
+};
+let timeoutDuration = 200 ;
+let timeoutGalleryContent = 600 ;
+let timeoutGalleryContentReload = 1000 ;
+let query = wixLocation.query;
+
+
+// start queries
+
+// begin translating queries to inputs for duration
+if ( query.duration==="1-5minutes") {                                              
+$w("#dataset1").setFilter( wixData.filter()
+.contains("durationMins", "01-05"))}
+if ( query.duration==="5-10minutes") {                                              
+$w("#dataset1").setFilter( wixData.filter()
+.contains("durationMins", "05-10"))}
+if ( query.duration==="10-20minutes") {                                              
+$w("#dataset1").setFilter( wixData.filter()
+.contains("durationMins", "10-20"))}
+if ( query.duration==="20-30minutes") {                                              
+$w("#dataset1").setFilter( wixData.filter()
+.contains("durationMins", "20-30"))}
+if ( query.duration==="30-60minutes") {                                              
+$w("#dataset1").setFilter( wixData.filter()
+.contains("durationMins", "30-60"))}
+if ( query.duration==="60plusminutes") {                                              
+$w("#dataset1").setFilter( wixData.filter()
+.contains("durationMins", "60plus"))}
+// finish translating queries from duration
+
+// begin translating queries to inputs for topic
+if ( query.topic==="pow") {                                              
+$w("#dataset1").setFilter( wixData.filter()
+.contains("topic", "Mining / PoW"))}
+if ( query.topic==="fud") {                                              
+$w("#dataset1").setFilter( wixData.filter()
+.contains("topic", "FUD"))}
+if ( query.topic==="FUD") {                                              
+$w("#dataset1").setFilter( wixData.filter()
+.contains("topic", "FUD"))}
+if ( query.topic==="monetarypolicy") {                                             
+$w("#dataset1").setFilter( wixData.filter()
+.contains("topic", "MOnetary Policy"))}
+if ( query.topic==="censorship") {                                              
+$w("#dataset1").setFilter( wixData.filter()
+.contains("topic", "Censorship Resistance"))}
+if ( query.topic==="blocksize") {                                              
+$w("#dataset1").setFilter( wixData.filter()
+.contains("topic", "Blocksize"))
+if ( query.topic==="bitcoinbasics") {                                              
+$w("#dataset1").setFilter( wixData.filter()
+.contains("topic", "Bitcoin Basics"))}
+}
+// finish translating queries from topic
+
+// begin translating queries to inputs for type
+if ( query.content==="podcast") {                                              
+$w("#dataset1").setFilter( wixData.filter()
+.contains("contentType1", "Podcast"))}
+if ( query.content==="video") {
+$w("#dataset1").setFilter( wixData.filter()
+.contains("contentType1", "Video"))}
+if ( query.content==="article") {
+$w("#dataset1").setFilter( wixData.filter()
+.contains("contentType1", "Article"))}
+if ( query.content==="book") {
+$w("#dataset1").setFilter( wixData.filter()
+.contains("contentType1", "Book"))}
+if ( query.content==="tweet") {
+$w("#dataset1").setFilter( wixData.filter()
+.contains("contentType1", "Tweet"))}
+// finish translating queries from content type
+// finish URL queries
+
+
+
+
+// begin onReady functions
+$w.onReady(function () {
+    $w("#galleryContent").collapse();
+    $w("#noResultsBox").hide();
+    $w("#galleryContent").hide();
+//    $w("#galleryWelcome").hide();
+    // checking if there are any queries
+    if( query.duration !== undefined    
+        || query.topic !== undefined
+        || query.content !== undefined) {
+    setTimeout(function() {
+ //   $w("#galleryWelcome").hide("fade",fadeOptions); 
+    }, 800);
+    setTimeout(function() { 
+    $w("#galleryContent").expand();
+    $w("#galleryContent").show("fade",fadeOptions);
+    }, 1000);
+        }  // finish checking if there are any queries 
+    /*
+    if( query.type === undefined ) {} else {                //checking for and applying type query
+    $w("#dropdownContent").selectedIndex = type;
+    }
+    if( query.topic === undefined ) {} else {               // checking for and applying topic query
+    $w("#dropdownTopic").selectedIndex = topic;
+    }
+    if ($w("#dropdownDuration").selectedIndex !== undefined || $w("#dropdownContent").selectedIndex !== undefined || $w("#dropdownTopic").selectedIndex !== undefined ) {
+        $w("#galleryContent").expand();
+    }
+    */
+});
+// end onReady functions
+
+// begin ResetFilters button
+export function ButtonResetFilters_click(event, $w) {
+        $w("#galleryContent").collapse();
+        $w("#boxDuration").hide("fade",fadeOptions);
+        $w("#boxTopic").show("fade",fadeOptions);
+        $w("#boxContent").hide("fade",fadeOptions);
+        $w("#dataset1").setFilter(wixData.filter());
+        $w("#textPrompt").text = 'What topic are you looking to learn?';
+        $w("#textStatus").text = "Bit-sized Bitcoin Knowledge Aggregator";
+        $w("#textPrompt").show();
+        $w("ButtonResetFilters").label = 'Reset Filters';
+        $w("#ButtonResetFilters").hide("fade",fadeOptions);
+                if(wixWindow.formFactor === "Mobile"){
+        $w("#mobileInstructions").hide();
+                }
+        setTimeout(function() {
+        $w("#ButtonResetFilters").label = 'Reset Filters';
+        }, 500);
+        $w("#resultsCountDisplay").hide("fade",fadeOptions);
+        $w("#noResultsBox").hide("fade",fadeOptions);
+
+
+// begin analytics event tracking
+wixWindow.trackEvent("CustomEvent", {
+  "event": "TrackingGA",
+  "eventCategory": "resetFilters",
+  "eventAction": "buttonClick",
+  "eventLabel": resetFilterAnalyticsLabel 
+} );
+// end analytics event tracking
+
+}
+// end ResetFilters button
+
+
+
+//begin topic buttons
+export function buttonPoW_click(event) {
+    topic = "Mining / PoW";
+    $w("#dataset1").setFilter( wixData.filter()
+    .contains("topic", "Mining / PoW")
+    ).then((results) => {
+    resultsCount = $w("#dataset1").getTotalCount(); 
+    console.log ( resultsCount + " results");
+});
+    $w("#boxTopic").hide("fade",fadeOptions);
+    setTimeout(function() { 
+    $w("#boxDuration").show("fade",fadeOptions);
+    $w("#ButtonResetFilters").show("fade",fadeOptions);
+    $w("#textPrompt").text = 'How much time do you have today?';
+    $w("#textStatus").text = topic + " | ..." ;
+  }, timeoutDuration);
+
+// begin analytics event tracking
+wixWindow.trackEvent("CustomEvent", {
+  "event": "TrackingGA",
+  "eventCategory": "filterTopic",
+  "eventAction": "buttonClick",
+  "eventLabel": "Mining / PoW"
+} );
+  resetFilterAnalyticsLabel = "Reset After Topic"
+// end analytics event tracking
+}
+
+
+export function buttonBitcoinBasics_click(event) {
+    topic = "Bitcoin Basics";
+    $w("#dataset1").setFilter( wixData.filter()
+    .contains("topic", "Bitcoin Basics")
+    ).then((results) => {
+    resultsCount = $w("#dataset1").getTotalCount(); 
+    console.log ( resultsCount + " results");
+});
+    $w("#boxTopic").hide("fade",fadeOptions);
+    setTimeout(function() { 
+    $w("#boxDuration").show("fade",fadeOptions);
+    $w("#ButtonResetFilters").show("fade",fadeOptions);
+    $w("#textPrompt").text = 'How much time do you have today?';
+    $w("#textStatus").text = topic + " | ..." ;
+  }, timeoutDuration);
+  
+  // begin analytics event tracking
+wixWindow.trackEvent("CustomEvent", {
+  "event": "TrackingGA",
+  "eventCategory": "filterTopic",
+  "eventAction": "buttonClick",
+  "eventLabel": "Bitcoin Basics"
+} );
+  resetFilterAnalyticsLabel = "Reset After Topic"
+// end analytics event tracking
+}
+
+
+// export function buttonBitcoinBasics_click(event) {
+//     function addTopic('Bitcoin Basics')
+// }
+
+
+
+
+export function buttonFUD_click(event) {
+    topic = "FUD";
+    $w("#dataset1").setFilter( wixData.filter()
+    .contains("topic", "FUD")
+    ).then((results) => {
+    resultsCount = $w("#dataset1").getTotalCount(); 
+    console.log ( resultsCount + " results");
+});
+    $w("#boxTopic").hide("fade",fadeOptions);
+    setTimeout(function() { 
+    $w("#boxDuration").show("fade",fadeOptions);
+    $w("#ButtonResetFilters").show("fade",fadeOptions);
+    $w("#textPrompt").text = 'How much time do you have today?';
+    $w("#textStatus").text = topic + " | ..." ;
+  }, timeoutDuration);
+
+    // begin analytics event tracking
+wixWindow.trackEvent("CustomEvent", {
+  "event": "TrackingGA",
+  "eventCategory": "filterTopic",
+  "eventAction": "buttonClick",
+  "eventLabel": "FUD"
+} );
+  resetFilterAnalyticsLabel = "Reset After Topic"
+// end analytics event tracking
+
+}
+
+export function buttonMonetaryPolicy_click(event) {
+    topic = "Monetary Policy";
+    $w("#dataset1").setFilter( wixData.filter()
+    .contains("topic", "Monetary Policy")
+    ).then((results) => {
+    resultsCount = $w("#dataset1").getTotalCount(); 
+    console.log ( resultsCount + " results");
+});
+    $w("#boxTopic").hide("fade",fadeOptions);
+    setTimeout(function() { 
+    $w("#boxDuration").show("fade",fadeOptions);
+    $w("#ButtonResetFilters").show("fade",fadeOptions);
+    $w("#textPrompt").text = 'How much time do you have today?';
+    $w("#textStatus").text = topic + " | ..." ;
+  }, timeoutDuration);
+
+    // begin analytics event tracking
+wixWindow.trackEvent("CustomEvent", {
+  "event": "TrackingGA",
+  "eventCategory": "filterTopic",
+  "eventAction": "buttonClick",
+  "eventLabel": "Monetary Policy"
+} );
+  resetFilterAnalyticsLabel = "Reset After Topic"
+// end analytics event tracking
+
+}
+
+export function buttonCensorship_click(event) {
+    topic = "Censorship Resistance";
+    $w("#dataset1").setFilter( wixData.filter()
+    .contains("topic", "Censorship Resistance")
+    ).then((results) => {
+    resultsCount = $w("#dataset1").getTotalCount(); 
+    console.log ( resultsCount + " results");
+});
+    $w("#boxTopic").hide("fade",fadeOptions);
+    setTimeout(function() { 
+    $w("#boxDuration").show("fade",fadeOptions);
+    $w("#ButtonResetFilters").show("fade",fadeOptions);
+    $w("#textPrompt").text = 'How much time do you have today?';
+    $w("#textStatus").text = topic + " | ..." ;
+  }, timeoutDuration);
+
+      // begin analytics event tracking
+wixWindow.trackEvent("CustomEvent", {
+  "event": "TrackingGA",
+  "eventCategory": "filterTopic",
+  "eventAction": "buttonClick",
+  "eventLabel": "Censorship Resistance"
+} );
+  resetFilterAnalyticsLabel = "Reset After Topic"
+// end analytics event tracking
+
+}
+
+export function buttonBlocksize_click(event) {
+    topic = "Blocksize";
+    $w("#dataset1").setFilter( wixData.filter()
+    .contains("topic", "Blocksize")
+    ).then((results) => {
+    resultsCount = $w("#dataset1").getTotalCount(); 
+    console.log ( resultsCount + " results");
+});
+    $w("#boxTopic").hide("fade",fadeOptions);
+    setTimeout(function() { 
+    $w("#boxDuration").show("fade",fadeOptions);
+    $w("#ButtonResetFilters").show("fade",fadeOptions);
+    $w("#textPrompt").text = 'How much time do you have today?';
+    $w("#textStatus").text = topic + " | ..." ;
+  }, timeoutDuration);
+        
+  // begin analytics event tracking
+wixWindow.trackEvent("CustomEvent", {
+  "event": "TrackingGA",
+  "eventCategory": "filterTopic",
+  "eventAction": "buttonClick",
+  "eventLabel": "Blocksize"
+} );
+  resetFilterAnalyticsLabel = "Reset After Topic"
+// end analytics event tracking
+}
+
+export function buttonLightningNetwork_click(event) {
+    topic = "Lightning Network";
+    $w("#dataset1").setFilter( wixData.filter()
+    .contains("topic", "Lightning Network")
+    ).then((results) => {
+    resultsCount = $w("#dataset1").getTotalCount(); 
+    console.log ( resultsCount + " results");
+});
+    $w("#boxTopic").hide("fade",fadeOptions);
+    setTimeout(function() { 
+    $w("#boxDuration").show("fade",fadeOptions);
+    $w("#ButtonResetFilters").show("fade",fadeOptions);
+    $w("#textPrompt").text = 'How much time do you have today?';
+    $w("#textStatus").text = topic + " | ..." ;
+  }, timeoutDuration);
+
+      // begin analytics event tracking
+wixWindow.trackEvent("CustomEvent", {
+  "event": "TrackingGA",
+  "eventCategory": "filterTopic",
+  "eventAction": "buttonClick",
+  "eventLabel": "Lightning Network"
+} );
+  resetFilterAnalyticsLabel = "Reset After Topic"
+// end analytics event tracking
+
+}
+
+
+export function buttonSelfCustody_click(event) {
+    topic = "Self-Custody";
+    $w("#dataset1").setFilter( wixData.filter()
+    .contains("topic", "Self-Custody")
+    ).then((results) => {
+    resultsCount = $w("#dataset1").getTotalCount(); 
+    console.log ( resultsCount + " results");
+});
+    $w("#boxTopic").hide("fade",fadeOptions);
+    setTimeout(function() { 
+    $w("#boxDuration").show("fade",fadeOptions);
+    $w("#ButtonResetFilters").show("fade",fadeOptions);
+    $w("#textPrompt").text = 'How much time do you have today?';
+    $w("#textStatus").text = topic + " | ..." ;
+  }, timeoutDuration);
+
+      // begin analytics event tracking
+wixWindow.trackEvent("CustomEvent", {
+  "event": "TrackingGA",
+  "eventCategory": "filterTopic",
+  "eventAction": "buttonClick",
+  "eventLabel": "Self-Custody"
+} );
+  resetFilterAnalyticsLabel = "Reset After Topic"
+// end analytics event tracking
+
+}
+
+
+
+export function buttonAllTopics_click(event) {
+    topic = "";
+    $w("#dataset1").setFilter( wixData.filter()
+    .contains("topic", topic)
+    ).then((results) => {
+    resultsCount = $w("#dataset1").getTotalCount(); 
+    console.log ( resultsCount + " results");
+});
+    $w("#boxTopic").hide("fade",fadeOptions);
+    setTimeout(function() { 
+    $w("#boxDuration").show("fade",fadeOptions);
+    $w("#ButtonResetFilters").show("fade",fadeOptions);
+    $w("#textPrompt").text = 'How much time do you have today?';
+    $w("#textStatus").text = "All Topics | " ;
+  }, timeoutDuration);
+
+      // begin analytics event tracking
+wixWindow.trackEvent("CustomEvent", {
+  "event": "TrackingGA",
+  "eventCategory": "filterTopic",
+  "eventAction": "buttonClick",
+  "eventLabel": "All Topics"
+} );
+  resetFilterAnalyticsLabel = "Reset After Topic"
+// end analytics event tracking
+}
+
+//end topic buttons
+
+
+
+
+
+
+
+//begin duration buttons
+export function button1to5mins_click(event)
+  // begin setting filter and hiding boxDuration
+{
+    duration = "01-05";
+    $w("#dataset1").setFilter( wixData.filter()
+    .contains("durationMins", duration)
+    .contains("topic", topic)
+    ).then((results) => {
+    resultsCount = $w("#dataset1").getTotalCount(); 
+    console.log ( resultsCount + " results");
+});
+    $w("#boxDuration").hide("fade",fadeOptions);
+// end setting filter and hiding boxDuration
+
+// begin analytics event tracking
+wixWindow.trackEvent("CustomEvent", {
+  "event": "TrackingGA",
+  "eventCategory": "filterDuration",
+  "eventAction": "buttonClick",
+  "eventLabel": "01-05 mins"
+} );
+  resetFilterAnalyticsLabel = "Reset After Duration"
+// end analytics event tracking
+
+// begin check if jump straight to results
+    setTimeout(function() { 
+    if ( resultsCount > jumpResultsThreshold ) {
+    $w("#boxContent").show("fade",fadeOptions);
+    $w("#textPrompt").text = 'Please choose the medium';
+        if( topic === "") {
+          $w("#textStatus").text = "All Topics" + " | " + duration + " mins | ...";  
+      } else{
+          $w("#textStatus").text = topic + " | " + duration + " mins | ...";
+      }
+      console.log ( resultsCount + " results, there's no need to jump to results here");
+  } 
+     else {
+    // begin displaying results
+    $w("#boxContent").hide("fade",fadeOptions);
+    setTimeout(function() { 
+    $w("#textPrompt").hide();
+    $w("#ButtonResetFilters").label = 'Start Over';
+    }, timeoutDuration);
+
+    if ( resultsCount !== 0) {
+    setTimeout(function() {
+      $w("#galleryContent").expand();
+      $w("#galleryContent").show("fade",fadeOptions);
+      if (wixWindow.formFactor === "Mobile"){
+      $w("#mobileInstructions").show();
+      $w("#resultsCountDisplay").scrollTo();
+    
+      }
+      }, timeoutGalleryContent);
+      timeoutGalleryContent = timeoutGalleryContentReload ;
+      }
+      else {
+      $w("#resultsCountDisplay").text = "No results";
+
+      setTimeout(function() {
+      $w("#noResultsBox").expand();
+      $w("#noResultsBox").show("fade",fadeOptions);
+      
+      if(wixWindow.formFactor === "Mobile"){
+      $w("#noResultsFormMobile").expand();
+      $w("#noResultsFormMobile").show();
+      $w("#noResultsFormDesktop").collapse();
+      $w("#noResultsFormDesktop").hide();
+      } else {
+      $w("#noResultsFormMobile").collapse();
+      $w("#noResultsFormMobile").hide();
+      $w("#noResultsFormDesktop").expand();
+      $w("#noResultsFormDesktop").show();
+      }
+      }, 500);
+          }
+
+// begin All Topics and All Durations check for textStatus
+    if( topic === "" && duration === "" ) {
+      $w("#textStatus").text = "All Topics";
+        } else { 
+          if ( topic === "" ) {
+            $w("#textStatus").text = "All Topics" + " | " + duration + " mins";    
+              } else { 
+                if ( duration === "") {
+                  $w("#textStatus").text = topic;   
+                    } else {
+                      $w("#textStatus").text = topic + " | " + duration + " mins";
+                        } 
+                          }         
+                            }
+// end All Topics and All Durations check for textStatus
+
+// begin updating results counter
+    resultsCount = $w("#dataset1").getTotalCount(); 
+    console.log ( resultsCount + " results");
+    if ( resultsCount === 0) {
+    $w("#resultsCountDisplay").text = "No results";
+    } else {
+        if ( resultsCount === 1) {
+          $w("#resultsCountDisplay").text = resultsCount + " result";
+        } else {
+            $w("#resultsCountDisplay").text = resultsCount + " results";
+               }
+          } 
+    setTimeout(function() {
+      $w("#resultsCountDisplay").show("fade",fadeOptions);
+      }, 600);
+//end updating results counter
+
+// end displaying results
+     }
+    }, 600);
+// end check if jump straight to results
+}
+
+
+export function button5to10mins_click(event) 
+// begin setting filter and hiding boxDuration
+{
+    duration = "05-10";
+    $w("#dataset1").setFilter( wixData.filter()
+    .contains("durationMins", duration)
+    .contains("topic", topic)
+    ).then((results) => {
+    resultsCount = $w("#dataset1").getTotalCount(); 
+    console.log ( resultsCount + " results");
+    console.log ( topic );
+});
+    $w("#boxDuration").hide("fade",fadeOptions);
+// end setting filter and hiding boxDuration
+
+// begin analytics event tracking
+wixWindow.trackEvent("CustomEvent", {
+  "event": "TrackingGA",
+  "eventCategory": "filterDuration",
+  "eventAction": "buttonClick",
+  "eventLabel": "05-10 mins"
+} );
+  resetFilterAnalyticsLabel = "Reset After Duration"
+// end analytics event tracking
+
+// begin check if jump straight to results
+    setTimeout(function() { 
+    if ( resultsCount > jumpResultsThreshold ) {
+    $w("#boxContent").show("fade",fadeOptions);
+    $w("#textPrompt").text = 'Please choose the medium';
+        if( topic === "") {
+          $w("#textStatus").text = "All Topics" + " | " + duration + " mins | ...";  
+      } else{
+          $w("#textStatus").text = topic + " | " + duration + " mins | ...";
+      }
+      console.log ( resultsCount + " results, there's no need to jump to results here");
+  } 
+     else {
+    // begin displaying results
+    $w("#boxContent").hide("fade",fadeOptions);
+    setTimeout(function() { 
+    $w("#textPrompt").hide();
+    $w("#ButtonResetFilters").label = 'Start Over';
+    }, timeoutDuration);
+
+    if ( resultsCount !== 0) {
+    setTimeout(function() {
+      $w("#galleryContent").expand();
+      $w("#galleryContent").show("fade",fadeOptions);
+      if (wixWindow.formFactor === "Mobile"){
+      $w("#mobileInstructions").show();
+      $w("#resultsCountDisplay").scrollTo();
+    
+      }
+      }, timeoutGalleryContent);
+      timeoutGalleryContent = timeoutGalleryContentReload ;
+      }
+      else {
+      $w("#resultsCountDisplay").text = "No results";
+
+      setTimeout(function() {
+      $w("#noResultsBox").expand();
+      $w("#noResultsBox").show("fade",fadeOptions);
+      
+      if(wixWindow.formFactor === "Mobile"){
+      $w("#noResultsFormMobile").expand();
+      $w("#noResultsFormMobile").show();
+      $w("#noResultsFormDesktop").collapse();
+      $w("#noResultsFormDesktop").hide();
+      } else {
+      $w("#noResultsFormMobile").collapse();
+      $w("#noResultsFormMobile").hide();
+      $w("#noResultsFormDesktop").expand();
+      $w("#noResultsFormDesktop").show();
+      }
+      }, 500);
+          }
+
+// begin All Topics and All Durations check for textStatus
+    if( topic === "" && duration === "" ) {
+      $w("#textStatus").text = "All Topics";
+        } else { 
+          if ( topic === "" ) {
+            $w("#textStatus").text = "All Topics" + " | " + duration + " mins";    
+              } else { 
+                if ( duration === "") {
+                  $w("#textStatus").text = topic;   
+                    } else {
+                      $w("#textStatus").text = topic + " | " + duration + " mins";
+                        } 
+                          }         
+                            }
+// end All Topics and All Durations check for textStatus
+
+// begin updating results counter
+    resultsCount = $w("#dataset1").getTotalCount(); 
+    console.log ( resultsCount + " results");
+    if ( resultsCount === 0) {
+    $w("#resultsCountDisplay").text = "No results";
+    } else {
+        if ( resultsCount === 1) {
+          $w("#resultsCountDisplay").text = resultsCount + " result";
+        } else {
+            $w("#resultsCountDisplay").text = resultsCount + " results";
+               }
+          } 
+    setTimeout(function() {
+      $w("#resultsCountDisplay").show("fade",fadeOptions);
+      }, 600);
+//end updating results counter
+
+// end displaying results
+     }
+    }, 600);
+// end check if jump straight to results
+}
+
+
+
+
+
+
+
+
+
+export function button10to20mins_click(event) 
+// begin setting filter and hiding boxDuration 
+{
+    duration = "10-20";
+    $w("#dataset1").setFilter( wixData.filter()
+    .contains("durationMins", duration)
+    .contains("topic", topic)
+    ).then((results) => {
+    resultsCount = $w("#dataset1").getTotalCount(); 
+    console.log ( resultsCount + " results");
+});
+    $w("#boxDuration").hide("fade",fadeOptions);
+// end setting filter and hiding boxDuration
+
+// begin analytics event tracking
+wixWindow.trackEvent("CustomEvent", {
+  "event": "TrackingGA",
+  "eventCategory": "filterDuration",
+  "eventAction": "buttonClick",
+  "eventLabel": "10-20 mins"
+} );
+  resetFilterAnalyticsLabel = "Reset After Duration"
+// end analytics event tracking
+
+// begin check if jump straight to results
+    setTimeout(function() { 
+    if ( resultsCount > jumpResultsThreshold ) {
+    $w("#boxContent").show("fade",fadeOptions);
+    $w("#textPrompt").text = 'Please choose the medium';
+        if( topic === "") {
+          $w("#textStatus").text = "All Topics" + " | " + duration + " mins | ...";  
+      } else{
+          $w("#textStatus").text = topic + " | " + duration + " mins | ...";
+      }
+      console.log ( resultsCount + " results, there's no need to jump to results here");
+  } 
+     else {
+    // begin displaying results
+    $w("#boxContent").hide("fade",fadeOptions);
+    setTimeout(function() { 
+    $w("#textPrompt").hide();
+    $w("#ButtonResetFilters").label = 'Start Over';
+    }, timeoutDuration);
+
+    if ( resultsCount !== 0) {
+    setTimeout(function() {
+      $w("#galleryContent").expand();
+      $w("#galleryContent").show("fade",fadeOptions);
+      if (wixWindow.formFactor === "Mobile"){
+      $w("#mobileInstructions").show();
+      $w("#resultsCountDisplay").scrollTo();
+    
+      }
+      }, timeoutGalleryContent);
+      timeoutGalleryContent = timeoutGalleryContentReload ;
+      }
+      else {
+      $w("#resultsCountDisplay").text = "No results";
+
+      setTimeout(function() {
+      $w("#noResultsBox").expand();
+      $w("#noResultsBox").show("fade",fadeOptions);
+      
+      if(wixWindow.formFactor === "Mobile"){
+      $w("#noResultsFormMobile").expand();
+      $w("#noResultsFormMobile").show();
+      $w("#noResultsFormDesktop").collapse();
+      $w("#noResultsFormDesktop").hide();
+      } else {
+      $w("#noResultsFormMobile").collapse();
+      $w("#noResultsFormMobile").hide();
+      $w("#noResultsFormDesktop").expand();
+      $w("#noResultsFormDesktop").show();
+      }
+      }, 500);
+          }
+
+// begin All Topics and All Durations check for textStatus
+    if( topic === "" && duration === "" ) {
+      $w("#textStatus").text = "All Topics";
+        } else { 
+          if ( topic === "" ) {
+            $w("#textStatus").text = "All Topics" + " | " + duration + " mins";    
+              } else { 
+                if ( duration === "") {
+                  $w("#textStatus").text = topic;   
+                    } else {
+                      $w("#textStatus").text = topic + " | " + duration + " mins";
+                        } 
+                          }         
+                            }
+// end All Topics and All Durations check for textStatus
+
+// begin updating results counter
+    resultsCount = $w("#dataset1").getTotalCount(); 
+    console.log ( resultsCount + " results");
+    if ( resultsCount === 0) {
+    $w("#resultsCountDisplay").text = "No results";
+    } else {
+        if ( resultsCount === 1) {
+          $w("#resultsCountDisplay").text = resultsCount + " result";
+        } else {
+            $w("#resultsCountDisplay").text = resultsCount + " results";
+               }
+          } 
+    setTimeout(function() {
+      $w("#resultsCountDisplay").show("fade",fadeOptions);
+      }, 600);
+//end updating results counter
+
+// end displaying results
+     }
+    }, 600);
+// end check if jump straight to results
+}
+
+
+
+
+
+
+export function button20to30mins_click(event) 
+// begin setting filter and hiding boxDuration 
+{
+    duration = "20-30";
+    $w("#dataset1").setFilter( wixData.filter()
+    .contains("durationMins", duration)
+    .contains("topic", topic)
+    ).then((results) => {
+    resultsCount = $w("#dataset1").getTotalCount(); 
+    console.log ( resultsCount + " results");
+});
+    $w("#boxDuration").hide("fade",fadeOptions);
+// end setting filter and hiding boxDuration
+
+// begin analytics event tracking
+wixWindow.trackEvent("CustomEvent", {
+  "event": "TrackingGA",
+  "eventCategory": "filterDuration",
+  "eventAction": "buttonClick",
+  "eventLabel": "20-30 mins"
+} );
+  resetFilterAnalyticsLabel = "Reset After Duration"
+// end analytics event tracking
+
+// begin check if jump straight to results
+    setTimeout(function() { 
+    if ( resultsCount > jumpResultsThreshold ) {
+    $w("#boxContent").show("fade",fadeOptions);
+    $w("#textPrompt").text = 'Please choose the medium';
+        if( topic === "") {
+          $w("#textStatus").text = "All Topics" + " | " + duration + " mins | ...";  
+      } else{
+          $w("#textStatus").text = topic + " | " + duration + " mins | ...";
+      }
+      console.log ( resultsCount + " results, there's no need to jump to results here");
+  } 
+     else {
+    // begin displaying results
+    $w("#boxContent").hide("fade",fadeOptions);
+    setTimeout(function() { 
+    $w("#textPrompt").hide();
+    $w("#ButtonResetFilters").label = 'Start Over';
+    }, timeoutDuration);
+
+    if ( resultsCount !== 0) {
+    setTimeout(function() {
+      $w("#galleryContent").expand();
+      $w("#galleryContent").show("fade",fadeOptions);
+      if (wixWindow.formFactor === "Mobile"){
+      $w("#mobileInstructions").show();
+      $w("#resultsCountDisplay").scrollTo();
+    
+      }
+      }, timeoutGalleryContent);
+      timeoutGalleryContent = timeoutGalleryContentReload ;
+      }
+      else {
+      $w("#resultsCountDisplay").text = "No results";
+
+      setTimeout(function() {
+      $w("#noResultsBox").expand();
+      $w("#noResultsBox").show("fade",fadeOptions);
+      
+      if(wixWindow.formFactor === "Mobile"){
+      $w("#noResultsFormMobile").expand();
+      $w("#noResultsFormMobile").show();
+      $w("#noResultsFormDesktop").collapse();
+      $w("#noResultsFormDesktop").hide();
+      } else {
+      $w("#noResultsFormMobile").collapse();
+      $w("#noResultsFormMobile").hide();
+      $w("#noResultsFormDesktop").expand();
+      $w("#noResultsFormDesktop").show();
+      }
+      }, 500);
+          }
+
+// begin All Topics and All Durations check for textStatus
+    if( topic === "" && duration === "" ) {
+      $w("#textStatus").text = "All Topics";
+        } else { 
+          if ( topic === "" ) {
+            $w("#textStatus").text = "All Topics" + " | " + duration + " mins";    
+              } else { 
+                if ( duration === "") {
+                  $w("#textStatus").text = topic;   
+                    } else {
+                      $w("#textStatus").text = topic + " | " + duration + " mins";
+                        } 
+                          }         
+                            }
+// end All Topics and All Durations check for textStatus
+
+// begin updating results counter
+    resultsCount = $w("#dataset1").getTotalCount(); 
+    console.log ( resultsCount + " results");
+    if ( resultsCount === 0) {
+    $w("#resultsCountDisplay").text = "No results";
+    } else {
+        if ( resultsCount === 1) {
+          $w("#resultsCountDisplay").text = resultsCount + " result";
+        } else {
+            $w("#resultsCountDisplay").text = resultsCount + " results";
+               }
+          } 
+    setTimeout(function() {
+      $w("#resultsCountDisplay").show("fade",fadeOptions);
+      }, 600);
+//end updating results counter
+
+// end displaying results
+     }
+    }, 600);
+// end check if jump straight to results
+}
+
+
+
+
+
+export function button30to60mins_click(event) 
+// begin setting filter and hiding boxDuration 
+{
+    duration = "30-60";
+    $w("#dataset1").setFilter( wixData.filter()
+    .contains("durationMins", duration)
+    .contains("topic", topic)
+    ).then((results) => {
+    resultsCount = $w("#dataset1").getTotalCount(); 
+    console.log ( resultsCount + " results");
+    console.log ( topic );
+
+});
+    $w("#boxDuration").hide("fade",fadeOptions);
+// end setting filter and hiding boxDuration
+
+// begin analytics event tracking
+wixWindow.trackEvent("CustomEvent", {
+  "event": "TrackingGA",
+  "eventCategory": "filterDuration",
+  "eventAction": "buttonClick",
+  "eventLabel": "30-60 mins"
+} );
+  resetFilterAnalyticsLabel = "Reset After Duration"
+// end analytics event tracking
+
+// begin check if jump straight to results
+    setTimeout(function() { 
+    if ( resultsCount > jumpResultsThreshold ) {
+    $w("#boxContent").show("fade",fadeOptions);
+    $w("#textPrompt").text = 'Please choose the medium';
+        if( topic === "") {
+          $w("#textStatus").text = "All Topics" + " | " + duration + " mins | ...";  
+      } else{
+          $w("#textStatus").text = topic + " | " + duration + " mins | ...";
+      }
+      console.log ( resultsCount + " results, there's no need to jump to results here");
+  } 
+     else {
+    // begin displaying results
+    $w("#boxContent").hide("fade",fadeOptions);
+    setTimeout(function() { 
+    $w("#textPrompt").hide();
+    $w("#ButtonResetFilters").label = 'Start Over';
+    }, timeoutDuration);
+
+    if ( resultsCount !== 0) {
+    setTimeout(function() {
+      $w("#galleryContent").expand();
+      $w("#galleryContent").show("fade",fadeOptions);
+      if (wixWindow.formFactor === "Mobile"){
+      $w("#mobileInstructions").show();
+      $w("#resultsCountDisplay").scrollTo();
+    
+      }
+      }, timeoutGalleryContent);
+      timeoutGalleryContent = timeoutGalleryContentReload ;
+      }
+      else {
+      $w("#resultsCountDisplay").text = "No results";
+
+      setTimeout(function() {
+      $w("#noResultsBox").expand();
+      $w("#noResultsBox").show("fade",fadeOptions);
+      
+      if(wixWindow.formFactor === "Mobile"){
+      $w("#noResultsFormMobile").expand();
+      $w("#noResultsFormMobile").show();
+      $w("#noResultsFormDesktop").collapse();
+      $w("#noResultsFormDesktop").hide();
+      } else {
+      $w("#noResultsFormMobile").collapse();
+      $w("#noResultsFormMobile").hide();
+      $w("#noResultsFormDesktop").expand();
+      $w("#noResultsFormDesktop").show();
+      }
+      }, 500);
+          }
+
+// begin All Topics and All Durations check for textStatus
+    if( topic === "" && duration === "" ) {
+      $w("#textStatus").text = "All Topics";
+        } else { 
+          if ( topic === "" ) {
+            $w("#textStatus").text = "All Topics" + " | " + duration + " mins";    
+              } else { 
+                if ( duration === "") {
+                  $w("#textStatus").text = topic;   
+                    } else {
+                      $w("#textStatus").text = topic + " | " + duration + " mins";
+                        } 
+                          }         
+                            }
+// end All Topics and All Durations check for textStatus
+
+// begin updating results counter
+    resultsCount = $w("#dataset1").getTotalCount(); 
+    console.log ( resultsCount + " results");
+    if ( resultsCount === 0) {
+    $w("#resultsCountDisplay").text = "No results";
+    } else {
+        if ( resultsCount === 1) {
+          $w("#resultsCountDisplay").text = resultsCount + " result";
+        } else {
+            $w("#resultsCountDisplay").text = resultsCount + " results";
+               }
+          } 
+    setTimeout(function() {
+      $w("#resultsCountDisplay").show("fade",fadeOptions);
+      }, 600);
+//end updating results counter
+
+// end displaying results
+     }
+    }, 600);
+// end check if jump straight to results
+}
+
+
+
+
+
+export function button60plusmins_click(event) 
+// begin setting filter and hiding boxDuration 
+{
+    duration = "60plus";
+    $w("#dataset1").setFilter( wixData.filter()
+    .contains("durationMins", duration)
+    .contains("topic", topic)
+    ).then((results) => {
+    resultsCount = $w("#dataset1").getTotalCount(); 
+    console.log ( resultsCount + " results");
+
+});
+    $w("#boxDuration").hide("fade",fadeOptions);
+// end setting filter and hiding boxDuration
+
+// begin analytics event tracking
+wixWindow.trackEvent("CustomEvent", {
+  "event": "TrackingGA",
+  "eventCategory": "filterDuration",
+  "eventAction": "buttonClick",
+  "eventLabel": "60plus mins"
+} );
+  resetFilterAnalyticsLabel = "Reset After Duration"
+// end analytics event tracking
+
+// begin check if jump straight to results
+    setTimeout(function() { 
+    if ( resultsCount > jumpResultsThreshold ) {
+    $w("#boxContent").show("fade",fadeOptions);
+    $w("#textPrompt").text = 'Please choose the medium';
+        if( topic === "") {
+          $w("#textStatus").text = "All Topics" + " | " + duration + " mins | ...";  
+      } else{
+          $w("#textStatus").text = topic + " | " + duration + " mins | ...";
+      }
+      console.log ( resultsCount + " results, there's no need to jump to results here");
+  } 
+     else {
+    // begin displaying results
+    $w("#boxContent").hide("fade",fadeOptions);
+    setTimeout(function() { 
+    $w("#textPrompt").hide();
+    $w("#ButtonResetFilters").label = 'Start Over';
+    }, timeoutDuration);
+
+    if ( resultsCount !== 0) {
+    setTimeout(function() {
+      $w("#galleryContent").expand();
+      $w("#galleryContent").show("fade",fadeOptions);
+      if (wixWindow.formFactor === "Mobile"){
+      $w("#mobileInstructions").show();
+      $w("#resultsCountDisplay").scrollTo();
+    
+      }
+      }, timeoutGalleryContent);
+      timeoutGalleryContent = timeoutGalleryContentReload ;
+      }
+      else {
+      $w("#resultsCountDisplay").text = "No results";
+
+      setTimeout(function() {
+      $w("#noResultsBox").expand();
+      $w("#noResultsBox").show("fade",fadeOptions);
+      
+      if(wixWindow.formFactor === "Mobile"){
+      $w("#noResultsFormMobile").expand();
+      $w("#noResultsFormMobile").show();
+      $w("#noResultsFormDesktop").collapse();
+      $w("#noResultsFormDesktop").hide();
+      } else {
+      $w("#noResultsFormMobile").collapse();
+      $w("#noResultsFormMobile").hide();
+      $w("#noResultsFormDesktop").expand();
+      $w("#noResultsFormDesktop").show();
+      }
+      }, 500);
+          }
+
+// begin All Topics and All Durations check for textStatus
+    if( topic === "" && duration === "" ) {
+      $w("#textStatus").text = "All Topics";
+        } else { 
+          if ( topic === "" ) {
+            $w("#textStatus").text = "All Topics" + " | " + duration + " mins";    
+              } else { 
+                if ( duration === "") {
+                  $w("#textStatus").text = topic;   
+                    } else {
+                      $w("#textStatus").text = topic + " | " + duration + " mins";
+                        } 
+                          }         
+                            }
+// end All Topics and All Durations check for textStatus
+
+// begin updating results counter
+    resultsCount = $w("#dataset1").getTotalCount(); 
+    console.log ( resultsCount + " results");
+    if ( resultsCount === 0) {
+    $w("#resultsCountDisplay").text = "No results";
+    } else {
+        if ( resultsCount === 1) {
+          $w("#resultsCountDisplay").text = resultsCount + " result";
+        } else {
+            $w("#resultsCountDisplay").text = resultsCount + " results";
+               }
+          } 
+    setTimeout(function() {
+      $w("#resultsCountDisplay").show("fade",fadeOptions);
+      }, 600);
+//end updating results counter
+
+// end displaying results
+     }
+    }, 600);
+// end check if jump straight to results
+}
+
+
+
+
+
+
+export function buttonSeeAllDurations_click(event) 
+// begin setting filter and hiding boxDuration 
+{
+    duration = "";
+    $w("#dataset1").setFilter( wixData.filter()
+    .contains("durationMins", duration)
+    .contains("topic", topic)
+    ).then((results) => {
+    resultsCount = $w("#dataset1").getTotalCount(); 
+    console.log ( resultsCount + " results");
+});
+    $w("#boxDuration").hide("fade",fadeOptions);
+// end setting filter and hiding boxDuration
+
+// begin analytics event tracking
+wixWindow.trackEvent("CustomEvent", {
+  "event": "TrackingGA",
+  "eventCategory": "filterDuration",
+  "eventAction": "buttonClick",
+  "eventLabel": "All durations"
+} );
+  resetFilterAnalyticsLabel = "Reset After Duration"
+// end analytics event tracking
+
+// begin check if jump straight to results
+    setTimeout(function() { 
+    if ( resultsCount > jumpResultsThreshold ) {
+    $w("#boxContent").show("fade",fadeOptions);
+    $w("#textPrompt").text = 'Please choose the medium';
+        if( topic === "") {
+          $w("#textStatus").text = "All Topics" + " | " + duration + " mins | ...";  
+      } else{
+          $w("#textStatus").text = topic + " | " + duration + " mins | ...";
+      }
+      console.log ( resultsCount + " results, there's no need to jump to results here");
+  } 
+     else {
+    // begin displaying results
+    $w("#boxContent").hide("fade",fadeOptions);
+    setTimeout(function() { 
+    $w("#textPrompt").hide();
+    $w("#ButtonResetFilters").label = 'Start Over';
+    }, timeoutDuration);
+
+    if ( resultsCount !== 0) {
+    setTimeout(function() {
+      $w("#galleryContent").expand();
+      $w("#galleryContent").show("fade",fadeOptions);
+      if (wixWindow.formFactor === "Mobile"){
+      $w("#mobileInstructions").show();
+      $w("#resultsCountDisplay").scrollTo();
+    
+      }
+      }, timeoutGalleryContent);
+      timeoutGalleryContent = timeoutGalleryContentReload ;
+      }
+      else {
+      $w("#resultsCountDisplay").text = "No results";
+
+      setTimeout(function() {
+      $w("#noResultsBox").expand();
+      $w("#noResultsBox").show("fade",fadeOptions);
+      
+      if(wixWindow.formFactor === "Mobile"){
+      $w("#noResultsFormMobile").expand();
+      $w("#noResultsFormMobile").show();
+      $w("#noResultsFormDesktop").collapse();
+      $w("#noResultsFormDesktop").hide();
+      } else {
+      $w("#noResultsFormMobile").collapse();
+      $w("#noResultsFormMobile").hide();
+      $w("#noResultsFormDesktop").expand();
+      $w("#noResultsFormDesktop").show();
+      }
+      }, 500);
+          }
+
+// begin All Topics and All Durations check for textStatus
+    if( topic === "" && duration === "" ) {
+      $w("#textStatus").text = "All Topics";
+        } else { 
+          if ( topic === "" ) {
+            $w("#textStatus").text = "All Topics" + " | " + duration + " mins";    
+              } else { 
+                if ( duration === "") {
+                  $w("#textStatus").text = topic;   
+                    } else {
+                      $w("#textStatus").text = topic + " | " + duration + " mins";
+                        } 
+                          }         
+                            }
+// end All Topics and All Durations check for textStatus
+
+// begin updating results counter
+    resultsCount = $w("#dataset1").getTotalCount(); 
+    console.log ( resultsCount + " results");
+    if ( resultsCount === 0) {
+    $w("#resultsCountDisplay").text = "No results";
+    } else {
+        if ( resultsCount === 1) {
+          $w("#resultsCountDisplay").text = resultsCount + " result";
+        } else {
+            $w("#resultsCountDisplay").text = resultsCount + " results";
+               }
+          } 
+    setTimeout(function() {
+      $w("#resultsCountDisplay").show("fade",fadeOptions);
+      }, 600);
+//end updating results counter
+
+// end displaying results
+     }
+    }, 600);
+// end check if jump straight to results
+}
+
+
+
+
+
+
+//duration buttons end
+
+
+
+
+
+
+// content buttons start
+export function buttonPodcast_click(event) {
+    content = "Podcast";
+
+    // begin setting filter
+    $w("#dataset1").setFilter( wixData.filter()
+    .contains("contentType1", "Podcast")
+    .contains("topic", topic)
+    .contains("durationMins", duration)
+    ).then((results) => {
+    resultsCount = $w("#dataset1").getTotalCount(); 
+    console.log ( resultsCount + " results");
+    if ( resultsCount === 0) {
+    $w("#resultsCountDisplay").text = "No results";
+    $w("#noResultsBox").show("fade",fadeOptions);
+    
+    if(wixWindow.formFactor === "Mobile"){
+    $w("#noResultsFormMobile").show();
+    $w("#noResultsFormDesktop").hide();
+    } else {
+    $w("#noResultsFormMobile").hide();
+    $w("#noResultsFormDesktop").show();
+    }
+
+    } else {
+        if ( resultsCount === 1) {
+          $w("#resultsCountDisplay").text = resultsCount + " result";
+        } else {
+            $w("#resultsCountDisplay").text = resultsCount + " results";
+               }
+          } 
+    setTimeout(function() {
+      $w("#resultsCountDisplay").show("fade",fadeOptions);
+      }, timeoutGalleryContent);
+        });
+    // end setting filter
+
+    // begin displaying results
+    
+    $w("#boxContent").hide("fade",fadeOptions);
+    setTimeout(function() { 
+    $w("#textPrompt").hide();
+    $w("#ButtonResetFilters").label = 'Start Over';
+    if(wixWindow.formFactor === "Mobile" && resultsCount !== 0 ){
+      $w("#mobileInstructions").show();
+      $w("#resultsCountDisplay").scrollTo();
+
+    }
+  }, timeoutDuration);
+
+  setTimeout(function() {
+    $w("#galleryContent").expand();
+      $w("#galleryContent").show("fade",fadeOptions);}, timeoutGalleryContent);
+  timeoutGalleryContent = timeoutGalleryContentReload ;
+
+// begin All Topics and All Durations check
+    if( topic === "" && duration === "" ) {
+      $w("#textStatus").text = "All Topics | " + content;
+        } else { 
+          if ( topic === "" ) {
+            $w("#textStatus").text = "All Topics" + " | " + duration + " mins" + " | " + content;    
+              } else { 
+                if ( duration === "") {
+                  $w("#textStatus").text = topic + " | " + content;   
+                    } else {
+                      $w("#textStatus").text = topic + " | " + duration + " mins" + " | " + content;
+                        } 
+                          }         
+                            }
+// end All Topics and All Durations check
+// end displaying results
+
+// begin analytics event tracking
+wixWindow.trackEvent("CustomEvent", {
+  "event": "TrackingGA",
+  "eventCategory": "filterContent",
+  "eventAction": "buttonClick",
+  "eventLabel": "Podcast"
+} );
+  resetFilterAnalyticsLabel = "Reset After Content"
+// end analytics event tracking
+
+
+}
+
+export function buttonVideo_click(event) {
+    content = "Video";
+
+    // begin setting filter
+    $w("#dataset1").setFilter( wixData.filter()
+    .contains("contentType1", content)
+    .contains("topic", topic)
+    .contains("durationMins", duration)
+    ).then((results) => {
+    resultsCount = $w("#dataset1").getTotalCount(); 
+    console.log ( resultsCount + " results");
+    if ( resultsCount === 0) {
+    $w("#resultsCountDisplay").text = "No results";
+    $w("#noResultsBox").show("fade",fadeOptions);
+    
+    if(wixWindow.formFactor === "Mobile"){
+    $w("#noResultsFormMobile").show();
+    $w("#noResultsFormDesktop").hide();
+    } else {
+    $w("#noResultsFormMobile").hide();
+    $w("#noResultsFormDesktop").show();
+    }
+
+    } else {
+        if ( resultsCount === 1) {
+          $w("#resultsCountDisplay").text = resultsCount + " result";
+        } else {
+            $w("#resultsCountDisplay").text = resultsCount + " results";
+               }
+          } 
+    setTimeout(function() {
+      $w("#resultsCountDisplay").show("fade",fadeOptions);
+      }, timeoutGalleryContent);
+        });
+    // end setting filter
+
+    // begin displaying results
+    $w("#boxContent").hide("fade",fadeOptions);
+    setTimeout(function() { 
+    $w("#textPrompt").hide();
+    $w("#ButtonResetFilters").label = 'Start Over';
+    if(wixWindow.formFactor === "Mobile" && resultsCount !== 0 ){
+      $w("#mobileInstructions").show();
+      $w("#resultsCountDisplay").scrollTo();
+
+    }
+  }, timeoutDuration);
+
+  setTimeout(function() {
+    $w("#galleryContent").expand();
+      $w("#galleryContent").show("fade",fadeOptions);}, timeoutGalleryContent);
+  timeoutGalleryContent = timeoutGalleryContentReload ;
+
+// begin All Topics and All Durations check
+    if( topic === "" && duration === "" ) {
+      $w("#textStatus").text = "All Topics | " + content;
+        } else { 
+          if ( topic === "" ) {
+            $w("#textStatus").text = "All Topics" + " | " + duration + " mins" + " | " + content;    
+              } else { 
+                if ( duration === "") {
+                  $w("#textStatus").text = topic + " | " + content;   
+                    } else {
+                      $w("#textStatus").text = topic + " | " + duration + " mins" + " | " + content;
+                        } 
+                          }         
+                            }
+// end All Topics and All Durations check
+// end displaying results
+
+// begin analytics event tracking
+wixWindow.trackEvent("CustomEvent", {
+  "event": "TrackingGA",
+  "eventCategory": "filterContent",
+  "eventAction": "buttonClick",
+  "eventLabel": "Video"
+} );
+  resetFilterAnalyticsLabel = "Reset After Content"
+// end analytics event tracking
+
+}
+
+export function buttonArticle_click(event) {
+    content = "Article";
+
+    // begin setting filter
+    $w("#dataset1").setFilter( wixData.filter()
+    .contains("contentType1", content)
+    .contains("topic", topic)
+    .contains("durationMins", duration)
+    ).then((results) => {
+    resultsCount = $w("#dataset1").getTotalCount(); 
+    console.log ( resultsCount + " results");
+    if ( resultsCount === 0) {
+    $w("#resultsCountDisplay").text = "No results";
+    $w("#noResultsBox").show("fade",fadeOptions);
+    
+    if(wixWindow.formFactor === "Mobile"){
+    $w("#noResultsFormMobile").show();
+    $w("#noResultsFormDesktop").hide();
+    } else {
+    $w("#noResultsFormMobile").hide();
+    $w("#noResultsFormDesktop").show();
+    }
+
+    } else {
+        if ( resultsCount === 1) {
+          $w("#resultsCountDisplay").text = resultsCount + " result";
+        } else {
+            $w("#resultsCountDisplay").text = resultsCount + " results";
+               }
+          } 
+    setTimeout(function() {
+      $w("#resultsCountDisplay").show("fade",fadeOptions);
+      }, timeoutGalleryContent);
+        });
+    // end setting filter
+
+    // begin displaying results
+    $w("#boxContent").hide("fade",fadeOptions);
+    setTimeout(function() { 
+    $w("#textPrompt").hide();
+    $w("#ButtonResetFilters").label = 'Start Over';
+    if(wixWindow.formFactor === "Mobile" && resultsCount !== 0 ){
+      $w("#mobileInstructions").show();
+      $w("#resultsCountDisplay").scrollTo();
+
+    }
+  }, timeoutDuration);
+
+  setTimeout(function() {
+    $w("#galleryContent").expand();
+      $w("#galleryContent").show("fade",fadeOptions);}, timeoutGalleryContent);
+  timeoutGalleryContent = timeoutGalleryContentReload ;
+
+// begin All Topics and All Durations check
+    if( topic === "" && duration === "" ) {
+      $w("#textStatus").text = "All Topics | " + content;
+        } else { 
+          if ( topic === "" ) {
+            $w("#textStatus").text = "All Topics" + " | " + duration + " mins" + " | " + content;    
+              } else { 
+                if ( duration === "") {
+                  $w("#textStatus").text = topic + " | " + content;   
+                    } else {
+                      $w("#textStatus").text = topic + " | " + duration + " mins" + " | " + content;
+                        } 
+                          }         
+                            }
+// end All Topics and All Durations check
+// end displaying results
+
+// begin analytics event tracking
+wixWindow.trackEvent("CustomEvent", {
+  "event": "TrackingGA",
+  "eventCategory": "filterContent",
+  "eventAction": "buttonClick",
+  "eventLabel": "Article"
+} );
+  resetFilterAnalyticsLabel = "Reset After Content"
+// end analytics event tracking
+
+}
+
+
+
+// export function buttonArticle_click(event) {
+//     function addContent('Article')
+// }
+
+
+
+
+export function buttonBook_click(event) {
+    content = "Book";
+    duration ="";
+
+    // begin setting filter
+    $w("#dataset1").setFilter( wixData.filter()
+    .contains("contentType1", content)
+    .contains("topic", topic)
+    .contains("durationMins", duration)
+    ).then((results) => {
+    resultsCount = $w("#dataset1").getTotalCount(); 
+    console.log ( resultsCount + " results");
+    if ( resultsCount === 0) {
+    $w("#resultsCountDisplay").text = "No results";
+    $w("#noResultsBox").show("fade",fadeOptions);
+    
+    if(wixWindow.formFactor === "Mobile"){
+    $w("#noResultsFormMobile").show();
+    $w("#noResultsFormDesktop").hide();
+    } else {
+    $w("#noResultsFormMobile").hide();
+    $w("#noResultsFormDesktop").show();
+    }
+
+    } else {
+        if ( resultsCount === 1) {
+          $w("#resultsCountDisplay").text = resultsCount + " result";
+        } else {
+            $w("#resultsCountDisplay").text = resultsCount + " results";
+               }
+          } 
+    setTimeout(function() {
+      $w("#resultsCountDisplay").show("fade",fadeOptions);
+      }, timeoutGalleryContent);
+        });
+    // end setting filter
+
+    // begin displaying results
+    $w("#boxContent").hide("fade",fadeOptions);
+    setTimeout(function() { 
+    $w("#textPrompt").hide();
+    $w("#ButtonResetFilters").label = 'Start Over';
+    if(wixWindow.formFactor === "Mobile" && resultsCount !== 0 ){
+      $w("#mobileInstructions").show();
+      $w("#resultsCountDisplay").scrollTo();
+
+    }
+  }, timeoutDuration);
+
+  setTimeout(function() {
+    $w("#galleryContent").expand();
+      $w("#galleryContent").show("fade",fadeOptions);}, timeoutGalleryContent);
+  timeoutGalleryContent = timeoutGalleryContentReload ;
+
+// begin All Topics and All Durations check
+    if( topic === "" && duration === "" ) {
+      $w("#textStatus").text = "All Topics | " + content;
+        } else { 
+          if ( topic === "" ) {
+            $w("#textStatus").text = "All Topics" + " | " + duration + " mins" + " | " + content;    
+              } else { 
+                if ( duration === "") {
+                  $w("#textStatus").text = topic + " | " + content;   
+                    } else {
+                      $w("#textStatus").text = topic + " | " + duration + " mins" + " | " + content;
+                        } 
+                          }         
+                            }
+// end All Topics and All Durations check
+// end displaying results
+
+// begin analytics event tracking
+wixWindow.trackEvent("CustomEvent", {
+  "event": "TrackingGA",
+  "eventCategory": "filterContent",
+  "eventAction": "buttonClick",
+  "eventLabel": "Book"
+} );
+  resetFilterAnalyticsLabel = "Reset After Content"
+// end analytics event tracking
+
+}
+
+export function buttonTweet_click(event) {
+    content = "Tweet";
+    duration = "";
+
+
+    // begin setting filter
+    $w("#dataset1").setFilter( wixData.filter()
+    .contains("contentType1", content)
+    .contains("topic", topic)
+    .contains("durationMins", duration)
+    ).then((results) => {
+    resultsCount = $w("#dataset1").getTotalCount(); 
+    console.log ( resultsCount + " results");
+    if ( resultsCount === 0) {
+    $w("#resultsCountDisplay").text = "No results";
+    $w("#noResultsBox").show("fade",fadeOptions);
+    
+    if(wixWindow.formFactor === "Mobile"){
+    $w("#noResultsFormMobile").show();
+    $w("#noResultsFormDesktop").hide();
+    } else {
+    $w("#noResultsFormMobile").hide();
+    $w("#noResultsFormDesktop").show();
+    }
+
+    } else {
+        if ( resultsCount === 1) {
+          $w("#resultsCountDisplay").text = resultsCount + " result";
+        } else {
+            $w("#resultsCountDisplay").text = resultsCount + " results";
+               }
+          } 
+    setTimeout(function() {
+      $w("#resultsCountDisplay").show("fade",fadeOptions);
+      }, timeoutGalleryContent);
+        });
+    // end setting filter
+
+    // begin displaying results
+    $w("#boxContent").hide("fade",fadeOptions);
+    setTimeout(function() { 
+    $w("#textPrompt").hide();
+    $w("#ButtonResetFilters").label = 'Start Over';
+    if(wixWindow.formFactor === "Mobile" && resultsCount !== 0 ){
+      $w("#mobileInstructions").show();
+      $w("#resultsCountDisplay").scrollTo();
+
+    }
+  }, timeoutDuration);
+
+  setTimeout(function() {
+    $w("#galleryContent").expand();
+      $w("#galleryContent").show("fade",fadeOptions);}, timeoutGalleryContent);
+  timeoutGalleryContent = timeoutGalleryContentReload ;
+
+// begin All Topics and All Durations check
+    if( topic === "" && duration === "" ) {
+      $w("#textStatus").text = "All Topics | " + content;
+        } else { 
+          if ( topic === "" ) {
+            $w("#textStatus").text = "All Topics" + " | " + duration + " mins" + " | " + content;    
+              } else { 
+                if ( duration === "") {
+                  $w("#textStatus").text = topic + " | " + content;   
+                    } else {
+                      $w("#textStatus").text = topic + " | " + duration + " mins" + " | " + content;
+                        } 
+                          }         
+                            }
+// end All Topics and All Durations check
+// end displaying results
+
+// begin analytics event tracking
+wixWindow.trackEvent("CustomEvent", {
+  "event": "TrackingGA",
+  "eventCategory": "filterContent",
+  "eventAction": "buttonClick",
+  "eventLabel": "Tweet"
+} );
+  resetFilterAnalyticsLabel = "Reset After Content"
+// end analytics event tracking
+
+}
+
+
+export function buttonSeeAll_click(event) {
+    content = "See All";  
+
+    // begin setting filter
+    $w("#dataset1").setFilter( wixData.filter()
+    .contains("contentType1", "")
+    .contains("topic", topic)
+    .contains("durationMins", duration)
+    ).then((results) => {
+    resultsCount = $w("#dataset1").getTotalCount(); 
+    console.log ( resultsCount + " results");
+    if ( resultsCount === 0) {
+    $w("#resultsCountDisplay").text = "No results";
+    $w("#noResultsBox").show("fade",fadeOptions);
+    
+    if(wixWindow.formFactor === "Mobile"){
+    $w("#noResultsFormMobile").show();
+    $w("#noResultsFormDesktop").hide();
+    } else {
+    $w("#noResultsFormMobile").hide();
+    $w("#noResultsFormDesktop").show();
+    }
+
+    } else {
+        if ( resultsCount === 1) {
+          $w("#resultsCountDisplay").text = resultsCount + " result";
+        } else {
+            $w("#resultsCountDisplay").text = resultsCount + " results";
+               }
+          } 
+    setTimeout(function() {
+      $w("#resultsCountDisplay").show("fade",fadeOptions);
+      }, timeoutGalleryContent);
+        });
+    // end setting filter
+
+    // begin displaying results
+    $w("#boxContent").hide("fade",fadeOptions);
+    setTimeout(function() { 
+    $w("#textPrompt").hide();
+    $w("#ButtonResetFilters").label = 'Start Over';
+    if(wixWindow.formFactor === "Mobile" && resultsCount !== 0 ){
+      $w("#mobileInstructions").show();
+      $w("#resultsCountDisplay").scrollTo();
+
+    }
+  }, timeoutDuration);
+
+  setTimeout(function() {
+    $w("#galleryContent").expand();
+      $w("#galleryContent").show("fade",fadeOptions);}, timeoutGalleryContent);
+  timeoutGalleryContent = timeoutGalleryContentReload ;
+
+// begin All Topics and All Durations check
+    if( topic === "" && duration === "" ) {
+      $w("#textStatus").text = "All Topics | " + content;
+        } else { 
+          if ( topic === "" ) {
+            $w("#textStatus").text = "All Topics" + " | " + duration + " mins" + " | " + content;    
+              } else { 
+                if ( duration === "") {
+                  $w("#textStatus").text = topic + " | " + content;   
+                    } else {
+                      $w("#textStatus").text = topic + " | " + duration + " mins" + " | " + content;
+                        } 
+                          }         
+                            }
+// end All Topics and All Durations check
+// end displaying results
+
+}
+
+//content buttons end
+
+
+
+
+
+
+
